@@ -1,14 +1,19 @@
 import pc from "picocolors";
 import { z } from "zod";
 
-import { validateBoolean, validateEnum, validateString } from "@/validators/commonRules";
+import {
+	validateBoolean,
+	validateEnum,
+	validateEnvNumber,
+	validateString
+} from "@/validators/commonRules";
 
-const emailEnvSchema = z.object({
-	EMAIL_SERVER_HOST: validateString("EMAIL_SERVER_HOST"),
-	EMAIL_SERVER_PORT: validateString("EMAIL_SERVER_PORT"),
-	EMAIL_SERVER_USER: validateString("EMAIL_SERVER_USER"),
-	EMAIL_SERVER_PASSWORD: validateString("EMAIL_SERVER_PASSWORD"),
-	EMAIL_FROM: validateString("EMAIL_FROM")
+const smtpEnvSchema = z.object({
+	SMTP_HOST: validateString("SMTP_HOST"),
+	SMTP_PORT: validateEnvNumber("SMTP_PORT", { min: 1, max: 65535, int: true }),
+	SMTP_SECURE: validateEnum("SMTP_SECURE", ["true", "false"]),
+	SMTP_USER: validateString("SMTP_USER"),
+	SMTP_PASSWORD: validateString("SMTP_PASSWORD")
 });
 
 export const googleEnvSchema = z.object({
@@ -17,25 +22,26 @@ export const googleEnvSchema = z.object({
 	GOOGLE_CALLBACK_URL: validateString("GOOGLE_CALLBACK_URL")
 });
 
+export const cookieSchema = z.object({
+	COOKIE_SETTINGS: validateEnum("COOKIE_SETTINGS", ["locally", "globally"]),
+	COOKIE_DOMAIN: validateString("COOKIE_DOMAIN"),
+	COOKIE_SAME_SITE: validateEnum("COOKIE_SAME_SITE", ["lax", "strict", "none"])
+});
+
 export const envSchema = z.object({
 	DATABASE_URL: validateString("DATABASE_URL"),
-	PORT: validateString("PORT").refine(value => !isNaN(Number(value)), "PORT must be a number"),
+	PORT: validateEnvNumber("PORT", { min: 1, int: true }),
 	SECRET: validateString("SECRET"),
 	NODE_ENV: validateEnum("NODE_ENV", ["development", "production"]),
 	SESSION_COOKIE_NAME: validateString("SESSION_COOKIE_NAME"),
 	ORIGIN_URL: validateString("ORIGIN_URL"),
-	COOKIE_SETTINGS: validateEnum("COOKIE_SETTINGS", ["locally", "globally"]),
-	COOKIE_DOMAIN: validateString("COOKIE_DOMAIN"),
-	COOKIE_SAME_SITE: validateEnum("COOKIE_SAME_SITE", ["lax", "strict", "none"]),
-	OTP_RESET_EXPIRY: validateString("OTP_RESET_EXPIRY").refine(
-		value => !isNaN(Number(value)),
-		"OTP_RESET_EXPIRY must be a number"
-	),
+	OTP_RESET_EXPIRY: validateEnvNumber("OTP_RESET_EXPIRY", { min: 1, int: true }),
 	SHOW_OTP: validateString("SHOW_OTP").refine(value =>
 		validateBoolean(value) ? true : "SHOW_OTP must be a boolean value (true or false)"
 	),
 	API_URL: validateString("API_URL"),
-	...emailEnvSchema.shape,
+	...cookieSchema.shape,
+	...smtpEnvSchema.shape,
 	...googleEnvSchema.shape
 });
 

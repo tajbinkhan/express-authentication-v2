@@ -7,16 +7,19 @@ import { emailTemplates } from "@/models/drizzle/emailTemplate.model";
 import { type ServiceApiResponse, ServiceResponse } from "@/utils/serviceApi";
 
 export default class EmailTemplateService extends DrizzleService {
-	async retrieveEmailTemplate(name: string): Promise<ServiceApiResponse<EmailTemplateSchemaType>> {
+	async retrieveEmailTemplate(
+		name: string
+	): Promise<ServiceApiResponse<EmailTemplateSchemaType | null>> {
 		try {
-			const template = await this.db.query.emailTemplates.findFirst({
+			const template = await this.getDb().query.emailTemplates.findFirst({
 				where: eq(emailTemplates.name, name)
 			});
 
 			if (!template) {
-				return ServiceResponse.createRejectResponse(
+				return ServiceResponse.createResponse(
 					StatusCodes.NOT_FOUND,
-					"Email template not found"
+					"Email template not found",
+					null
 				);
 			}
 

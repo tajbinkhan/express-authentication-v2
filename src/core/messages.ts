@@ -10,7 +10,8 @@ export const zodMessages = {
 			arrayMax: (field: string, limit: number) => `${field} must not exceed ${limit} items.`,
 			numberMin: (field: string, limit: number) => `${field} must be at least ${limit}.`,
 			numberMax: (field: string, limit: number) => `${field} must not exceed ${limit}.`,
-			fileSize: (field: string, limit: string) => `${field} must not exceed ${limit}.`
+			fileSize: (field: string, limit: string) => `${field} must not exceed ${limit}.`,
+			length: (field: string, limit: number) => `${field} must be exactly ${limit} characters.`
 		},
 		invalid: {
 			invalidString: (field: string) => `${field} must be a string.`,

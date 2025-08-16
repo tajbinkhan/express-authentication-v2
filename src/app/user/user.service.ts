@@ -35,7 +35,7 @@ export default class UserService extends DrizzleService {
 			data.username &&
 				(await this.authenticationService.duplicateUserCheckByUsername(data.username));
 
-			const user = await this.db.insert(users).values(data).returning();
+			const user = await this.getDb().insert(users).values(data).returning();
 
 			const { password, ...userData } = user[0];
 
@@ -81,7 +81,7 @@ export default class UserService extends DrizzleService {
 				});
 			}
 
-			const totalItems = await this.db
+			const totalItems = await this.getDb()
 				.select({
 					count: count()
 				})
@@ -95,7 +95,7 @@ export default class UserService extends DrizzleService {
 				totalItems
 			).createPagination();
 
-			const data = await this.db.query.users.findMany({
+			const data = await this.getDb().query.users.findMany({
 				columns: { password: false },
 				where: whereClause,
 				limit: filter.limit ? filter.limit : undefined,
@@ -120,7 +120,7 @@ export default class UserService extends DrizzleService {
 		try {
 			const orderBy = this.sortingHelper.applySorting(filter.sortBy, filter.sortOrder);
 
-			const data = await this.db.query.users.findMany({
+			const data = await this.getDb().query.users.findMany({
 				where: filter.where,
 				orderBy,
 				columns: { password: false }
@@ -134,7 +134,7 @@ export default class UserService extends DrizzleService {
 
 	async deleteUserByIds(ids: number[]): Promise<ServiceApiResponse<boolean>> {
 		try {
-			await this.db.delete(users).where(inArray(users.id, ids));
+			await this.getDb().delete(users).where(inArray(users.id, ids));
 
 			return ServiceResponse.createResponse(StatusCodes.OK, "Users deleted successfully", true);
 		} catch (error) {
@@ -144,7 +144,7 @@ export default class UserService extends DrizzleService {
 
 	async deleteAllUsers(): Promise<ServiceApiResponse<boolean>> {
 		try {
-			await this.db.delete(users);
+			await this.getDb().delete(users);
 
 			return ServiceResponse.createResponse(StatusCodes.OK, "All users deleted successfully", true);
 		} catch (error) {

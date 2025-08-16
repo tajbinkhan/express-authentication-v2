@@ -1,9 +1,7 @@
 import { z } from "zod";
 
-import { TOKEN_LIST } from "@/databases/drizzle/lists";
 import {
 	validateEmail,
-	validateEnum,
 	validateNewPassword,
 	validatePassword,
 	validatePositiveNumber,
@@ -12,39 +10,49 @@ import {
 	validateUsernameOrEmail
 } from "@/validators/commonRules";
 
-export const UserLoginSchema = z.object({
+export const userIdentityVerificationSchema = z.object({
 	usernameOrEmail: validateUsernameOrEmail,
 	password: validateString("Password")
 });
 
-export const UserRegisterSchema = z.object({
-	name: validateString("Name"),
-	username: validateUsername,
-	email: validateEmail,
-	password: validatePassword
+export const userLoginSchema = z.object({
+	usernameOrEmail: validateUsernameOrEmail,
+	password: validateString("Password"),
+	otp: validatePositiveNumber("OTP")
 });
 
-export const UserOTPRequestSchema = z.object({
+export const userRegisterSchema = z.object({
+	username: validateUsername,
+	email: validateEmail,
+	password: validateNewPassword,
+	name: validateString("Name")
+});
+
+export const userOTPRequestSchema = z.object({
 	email: validateEmail
 });
 
-export const UserReverificationSchema = z.object({
-	username: validateUsernameOrEmail
-});
-
-export const UserOTPVerifySchema = z.object({
+export const userOTPVerifySchema = z.object({
 	email: validateEmail,
-	otp: validatePositiveNumber("OTP"),
-	verificationMethod: validateEnum("Verification Method", TOKEN_LIST.enumValues)
+	otp: validatePositiveNumber("OTP")
 });
 
-export const UserPasswordResetSchema = z.object({
+export const userPasswordResetSchema = z.object({
 	email: validateEmail,
 	otp: validatePositiveNumber("OTP"),
 	password: validatePassword
 });
 
-export const UserChangePasswordSchema = z.object({
+export const userChangePasswordSchema = z.object({
 	oldPassword: validatePassword,
 	newPassword: validateNewPassword
+});
+
+export const userUpdateCurrentOrganizationSchema = z.object({
+	organizationId: validatePositiveNumber("Organization ID").or(
+		z.null({
+			error: issue =>
+				issue.input !== null ? "Organization ID must be a positive number or null" : undefined
+		})
+	)
 });

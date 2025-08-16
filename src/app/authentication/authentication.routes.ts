@@ -17,26 +17,35 @@ export const authenticationRouter: Router = (() => {
 		})
 	);
 
-	// Account verification route
-	router.get("/account-verification", authenticationMiddleware, (req, res) => {
-		new AuthenticationController(req, res).checkAccountVerification();
-	});
-
-	// Register route
-	router.post("/register", (req, res) => {
-		new AuthenticationController(req, res).register();
-	});
-
-	// Request OTP route
-	router.post("/request-otp", (req, res) => {
-		new AuthenticationController(req, res).requestOTPForUnverifiedUser();
-	});
-
-	// Verify login OTP route
+	// Register user route
 	router.post(
-		"/verify-otp",
+		"/register",
 		asyncErrorHandler(async (req, res) => {
-			await new AuthenticationController(req, res).verifyOTP();
+			await new AuthenticationController(req, res).register();
+		})
+	);
+
+	// Request OTP for email verification
+	router.post(
+		"/register/otp",
+		asyncErrorHandler(async (req, res) => {
+			await new AuthenticationController(req, res).reRequestOTP();
+		})
+	);
+
+	// Verify user registration
+	router.post(
+		"/register/verify",
+		asyncErrorHandler(async (req, res) => {
+			await new AuthenticationController(req, res).verifyUser();
+		})
+	);
+
+	// Verify identity
+	router.post(
+		"/verify-identity",
+		asyncErrorHandler(async (req, res) => {
+			await new AuthenticationController(req, res).verifyIdentity();
 		})
 	);
 
@@ -45,6 +54,30 @@ export const authenticationRouter: Router = (() => {
 		"/login",
 		asyncErrorHandler(async (req, res) => {
 			await new AuthenticationController(req, res).login();
+		})
+	);
+
+	// Password reset request route
+	router.post(
+		"/reset-password/request",
+		asyncErrorHandler(async (req, res) => {
+			await new AuthenticationController(req, res).resetPasswordOTPRequest();
+		})
+	);
+
+	// Password reset OTP verification route
+	router.post(
+		"/reset-password/verify",
+		asyncErrorHandler(async (req, res) => {
+			await new AuthenticationController(req, res).resetPasswordOTPVerify();
+		})
+	);
+
+	// Password reset confirmation route
+	router.post(
+		"/reset-password/confirm",
+		asyncErrorHandler(async (req, res) => {
+			await new AuthenticationController(req, res).resetPasswordConfirm();
 		})
 	);
 
@@ -65,22 +98,6 @@ export const authenticationRouter: Router = (() => {
 		passport.authenticate("google", { failureRedirect: "/login" }),
 		asyncErrorHandler(async (req, res) => {
 			await new AuthenticationController(req, res).loginWithGoogle();
-		})
-	);
-
-	// Password reset request route
-	router.post(
-		"/reset-password/request",
-		asyncErrorHandler(async (req, res) => {
-			await new AuthenticationController(req, res).resetPasswordOTPRequest();
-		})
-	);
-
-	// Password reset confirmation route
-	router.post(
-		"/reset-password/confirm",
-		asyncErrorHandler(async (req, res) => {
-			await new AuthenticationController(req, res).resetPasswordConfirm();
 		})
 	);
 

@@ -13,7 +13,7 @@ export const createSortingSchemas = <T extends PgTableWithColumns<any>>(
 			.string()
 			.optional()
 			.transform(val => {
-				if (val && sortingHelper.isValidSortBy(val)) return String(val);
+				if (val && sortingHelper.isValidSortMethod(val)) return String(val);
 				return pageValue ? "id" : undefined;
 			})
 			.pipe(z.string().optional());

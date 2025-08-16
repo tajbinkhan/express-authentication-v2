@@ -27,22 +27,22 @@ export class SortingHelper<T extends PgTableWithColumns<any>> {
 		return Object.keys(this.sortableFields);
 	}
 
-	public applySorting(sortBy?: string, sortOrder?: string): SQL | undefined {
-		if (!sortBy) return desc(this.model.id);
+	public applySorting(sortMethod?: string, sortBy?: string): SQL | undefined {
+		if (!sortMethod) return desc(this.model.id);
 
-		const sortField = this.sortableFields[sortBy];
+		const sortField = this.sortableFields[sortMethod];
 
 		if (!sortField) return desc(this.model.id);
 
-		const sortDirection = sortOrder?.toLowerCase() === "asc" ? asc : desc;
+		const sortDirection = sortBy?.toLowerCase() === "asc" ? asc : desc;
 		return sortDirection(sortField);
 	}
 
-	public isValidSortBy(sortBy: string): boolean {
-		return sortBy in this.sortableFields;
+	public isValidSortMethod(sortMethod: string): boolean {
+		return sortMethod in this.sortableFields;
 	}
 
-	public isValidSortDirection(sortOrder: string): boolean {
-		return ["asc", "desc"].includes(sortOrder.toLowerCase());
+	public isValidSortDirection(sortBy: string): boolean {
+		return ["asc", "desc"].includes(sortBy.toLowerCase());
 	}
 }

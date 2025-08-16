@@ -19,6 +19,13 @@ export default class AuthenticationService extends DrizzleService {
 		try {
 			data.username && (await this.duplicateUserCheckByUsername(data.username));
 			data.email && (await this.duplicateUserCheckByEmail(data.email));
+
+			// Encrypt the password
+			if (data.password) {
+				data.password = await bcrypt.hash(data.password, 10);
+			}
+
+			// Create the user
 			const createdUser = await this.getDb().insert(users).values(data).returning();
 
 			const { password, ...user } = createdUser[0];
@@ -35,7 +42,7 @@ export default class AuthenticationService extends DrizzleService {
 		accessToken: string
 	): Promise<ServiceApiResponse<AccountSchemaType>> {
 		try {
-			const createdGoogleAccount = await this.db
+			const createdGoogleAccount = await this.getDb()
 				.insert(accounts)
 				.values({
 					userId,
@@ -67,7 +74,7 @@ export default class AuthenticationService extends DrizzleService {
 		accessToken: string
 	): Promise<ServiceApiResponse<Omit<UserSchemaType, "password">>> {
 		try {
-			const checkUserExistence = await this.db.query.users.findFirst({
+			const checkUserExistence = await this.getDb().query.users.findFirst({
 				where: eq(users.email, data._json.email!),
 				with: {
 					accounts: {
@@ -80,7 +87,7 @@ export default class AuthenticationService extends DrizzleService {
 			if (checkUserExistence) {
 				// If user has a google account, update the access token
 				if (checkUserExistence.accounts.length > 0) {
-					await this.db
+					await this.getDb()
 						.update(accounts)
 						.set({ accessToken })
 						.where(eq(accounts.providerAccountId, data.id));
