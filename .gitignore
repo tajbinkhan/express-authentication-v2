@@ -152,6 +152,6 @@ submission-routes.json
 uploads
 
 # Workspace Storage
-pnpm-workspace.yaml
+# pnpm-workspace.yaml
 
 # End of https://www.toptal.com/developers/gitignore/api/node
