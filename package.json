@@ -31,9 +31,20 @@
 		"db:reset": "npm run db:clear && npm run db:migrate && npm run db:seed",
 		"destroy": "rimraf -g \"{node_modules,.next,.cache}\""
 	},
-	"keywords": [],
-	"author": "",
-	"license": "UNLICENSED",
+	"keywords": [
+		"express",
+		"authentication",
+		"passport",
+		"typescript",
+		"drizzle-orm",
+		"postgresql",
+		"oauth",
+		"api",
+		"nodejs",
+		"security"
+	],
+	"author": "Tajbin Khan",
+	"license": "MIT",
 	"lint-staged": {
 		"**/*.{js,jsx,ts,tsx}": [
 			"eslint --fix",
