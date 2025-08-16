@@ -75,8 +75,8 @@ indexRouter(app);
 
 /**
  * Initialize all routes are handled in the api.ts file
- * All routes will start with /api
- * Example: http://localhost:3000/api/auth/login
+ * All routes will start with /
+ * Example: http://localhost:8080/auth/login
  */
 appRouter(app);
 

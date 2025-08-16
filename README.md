@@ -163,23 +163,23 @@ pnpm db:reset
 
 ### Authentication
 
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/google` - Google OAuth login
-- `GET /api/auth/google/callback` - Google OAuth callback
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/logout` - User logout
+- `GET /auth/google` - Google OAuth login
+- `GET /auth/google/callback` - Google OAuth callback
 
 ### User Management
 
-- `GET /api/users/profile` - Get user profile
-- `PUT /api/users/profile` - Update user profile
-- `POST /api/users/change-password` - Change password
+- `GET /users/profile` - Get user profile
+- `PUT /users/profile` - Update user profile
+- `POST /users/change-password` - Change password
 
 ### Email Services
 
-- `POST /api/email/verify` - Send verification email
-- `POST /api/email/forgot-password` - Send password reset email
-- `POST /api/email/reset-password` - Reset password
+- `POST /email/verify` - Send verification email
+- `POST /email/forgot-password` - Send password reset email
+- `POST /email/reset-password` - Reset password
 
 ## Project Structure
 
