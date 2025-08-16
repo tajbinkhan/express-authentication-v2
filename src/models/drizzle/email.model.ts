@@ -1,4 +1,4 @@
-import { boolean, pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, serial, varchar } from "drizzle-orm/pg-core";
 
 import { timestamps } from "@/databases/drizzle/helpers";
 
@@ -6,7 +6,7 @@ export const email = pgTable("email", {
 	id: serial("id").primaryKey(),
 	emailConfigName: varchar("email_config_name", { length: 255 }).notNull().unique(),
 	host: varchar("host", { length: 255 }).notNull(),
-	port: varchar("port", { length: 255 }).notNull(),
+	port: integer("port").notNull(),
 	username: varchar("username", { length: 255 }).notNull(),
 	password: varchar("password", { length: 255 }).notNull(),
 	secure: boolean("secure").notNull().default(false),

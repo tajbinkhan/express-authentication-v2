@@ -11,7 +11,6 @@ import {
 const smtpEnvSchema = z.object({
 	SMTP_HOST: validateString("SMTP_HOST"),
 	SMTP_PORT: validateEnvNumber("SMTP_PORT", { min: 1, max: 65535, int: true }),
-	SMTP_SECURE: validateEnum("SMTP_SECURE", ["true", "false"]),
 	SMTP_USER: validateString("SMTP_USER"),
 	SMTP_PASSWORD: validateString("SMTP_PASSWORD")
 });

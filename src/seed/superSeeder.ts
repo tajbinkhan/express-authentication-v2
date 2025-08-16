@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 
+import EmailSeeder from "@/seed/email/emailSeed";
 import EmailTemplateSeeder from "@/seed/emailTemplate/emailTemplateSeed";
 import UserSeeder from "@/seed/user/userSeed";
 
@@ -15,10 +16,12 @@ dotenv.config();
 export default class SuperSeeder {
 	private userSeeder: UserSeeder;
 	private emailTemplateSeeder: EmailTemplateSeeder;
+	private emailSeeder: EmailSeeder;
 
 	constructor() {
 		this.userSeeder = new UserSeeder();
 		this.emailTemplateSeeder = new EmailTemplateSeeder();
+		this.emailSeeder = new EmailSeeder();
 	}
 
 	/**
@@ -31,6 +34,9 @@ export default class SuperSeeder {
 		const startTime = Date.now();
 
 		try {
+			// Seed email configurations first (as they might be needed by email services)
+			await this.emailSeeder.run();
+
 			// Seed email templates (as they might be needed by user notifications)
 			await this.emailTemplateSeeder.run();
 
@@ -68,6 +74,20 @@ export default class SuperSeeder {
 	}
 
 	/**
+	 * Run only email configuration seeder
+	 */
+	async runEmailSeeder(): Promise<void> {
+		console.log("🚀 Running Email Configuration Seeder only...");
+		try {
+			await this.emailSeeder.run();
+			console.log("✅ Email Configuration Seeder completed successfully!");
+		} catch (error) {
+			console.error("❌ Email Configuration Seeder failed:", error);
+			throw error;
+		}
+	}
+
+	/**
 	 * Run only email template seeder
 	 */
 	async runEmailTemplateSeeder(): Promise<void> {
@@ -89,6 +109,7 @@ export default class SuperSeeder {
 		try {
 			await this.userSeeder.clearUsers();
 			await this.emailTemplateSeeder.clearEmailTemplates();
+			await this.emailSeeder.clearEmailConfigurations();
 			console.log("✅ All seeded data cleared successfully!");
 		} catch (error) {
 			console.error("❌ Failed to clear seeded data:", error);
@@ -118,6 +139,12 @@ if (require.main === module) {
 				case "user":
 					await superSeeder.runUserSeeder();
 					break;
+				case "emailconfigs":
+				case "emailconfig":
+				case "email-configs":
+				case "email-config":
+					await superSeeder.runEmailSeeder();
+					break;
 				case "emails":
 				case "email":
 				case "templates":
@@ -127,10 +154,10 @@ if (require.main === module) {
 					await superSeeder.clearAll();
 					break;
 				default:
-					console.log("Usage: npm run db:seed [all|languages|users|emails|clear]");
+					console.log("Usage: npm run db:seed [all|users|emailconfigs|emails|clear]");
 					console.log("  all (default) - Run all seeders");
-					console.log("  languages     - Run only language seeder");
 					console.log("  users         - Run only user seeder");
+					console.log("  emailconfigs  - Run only email configuration seeder");
 					console.log("  emails        - Run only email template seeder");
 					console.log("  clear         - Clear all seeded data");
 					break;

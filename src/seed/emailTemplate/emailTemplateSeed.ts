@@ -19,7 +19,7 @@ export default class EmailTemplateSeeder extends DrizzleService {
 		const templates: EmailTemplateData[] = [
 			{
 				name: "login_otp",
-				subject: "QDS Healthcare - Login Verification Code",
+				subject: "Webphics - Login Verification Code",
 				html: `
 					<!DOCTYPE html>
 					<html>
@@ -40,12 +40,12 @@ export default class EmailTemplateSeeder extends DrizzleService {
 					<body>
 						<div class="container">
 							<div class="header">
-								<div class="logo">QDS Healthcare Pro</div>
+								<div class="logo">Webphics</div>
 							</div>
 
 							<h2>Hello {{username}},</h2>
 
-							<p>We received a request to log into your QDS Healthcare account. To complete your login, please use the verification code below:</p>
+							<p>We received a request to log into your Webphics account. To complete your login, please use the verification code below:</p>
 
 							<div class="otp-box">
 								<div>Your verification code is:</div>
@@ -56,11 +56,11 @@ export default class EmailTemplateSeeder extends DrizzleService {
 
 							<p>For your security, never share this code with anyone.</p>
 
-							<p>Best regards,<br>The QDS Healthcare Team</p>
+							<p>Best regards,<br>The Webphics Team</p>
 
 							<div class="footer">
 								<p>This is an automated message, please do not reply to this email.</p>
-								<p>&copy; 2025 QDS Healthcare Pro. All rights reserved.</p>
+								<p>&copy; 2025 Webphics. All rights reserved.</p>
 							</div>
 						</div>
 					</body>
@@ -69,7 +69,7 @@ export default class EmailTemplateSeeder extends DrizzleService {
 			},
 			{
 				name: "password_reset",
-				subject: "QDS Healthcare - Password Reset Request",
+				subject: "Webphics - Password Reset Request",
 				html: `
 					<!DOCTYPE html>
 					<html>
@@ -90,12 +90,12 @@ export default class EmailTemplateSeeder extends DrizzleService {
 					<body>
 						<div class="container">
 							<div class="header">
-								<div class="logo">QDS Healthcare Pro</div>
+								<div class="logo">Webphics</div>
 							</div>
 
 							<h2>Hello {{username}},</h2>
 
-							<p>We received a request to reset your QDS Healthcare account password. To proceed with the password reset, please use the verification code below:</p>
+							<p>We received a request to reset your Webphics account password. To proceed with the password reset, please use the verification code below:</p>
 
 							<div class="otp-box">
 								<div>Your password reset code is:</div>
@@ -106,11 +106,11 @@ export default class EmailTemplateSeeder extends DrizzleService {
 
 							<p>For your security, never share this code with anyone.</p>
 
-							<p>Best regards,<br>The QDS Healthcare Team</p>
+							<p>Best regards,<br>The Webphics Team</p>
 
 							<div class="footer">
 								<p>This is an automated message, please do not reply to this email.</p>
-								<p>&copy; 2025 QDS Healthcare Pro. All rights reserved.</p>
+								<p>&copy; 2025 Webphics. All rights reserved.</p>
 							</div>
 						</div>
 					</body>
@@ -119,7 +119,7 @@ export default class EmailTemplateSeeder extends DrizzleService {
 			},
 			{
 				name: "email_verification",
-				subject: "QDS Healthcare - Verify Your Email Address",
+				subject: "Webphics - Verify Your Email Address",
 				html: `
 					<!DOCTYPE html>
 					<html>
@@ -140,12 +140,12 @@ export default class EmailTemplateSeeder extends DrizzleService {
 					<body>
 						<div class="container">
 							<div class="header">
-								<div class="logo">QDS Healthcare Pro</div>
+								<div class="logo">Webphics</div>
 							</div>
 
-							<h2>Welcome to QDS Healthcare, {{username}}!</h2>
+							<h2>Welcome to Webphics, {{username}}!</h2>
 
-							<p>Thank you for registering with QDS Healthcare Pro. To complete your account setup, please verify your email address using the code below:</p>
+							<p>Thank you for registering with Webphics. To complete your account setup, please verify your email address using the code below:</p>
 
 							<div class="otp-box">
 								<div>Your verification code is:</div>
@@ -154,13 +154,13 @@ export default class EmailTemplateSeeder extends DrizzleService {
 
 							<p><strong>Important:</strong> This code will expire in {{otpExpirationTime}} minutes. If you didn't create this account, please ignore this email.</p>
 
-							<p>Once verified, you'll have full access to all QDS Healthcare features!</p>
+							<p>Once verified, you'll have full access to all Webphics features!</p>
 
-							<p>Best regards,<br>The QDS Healthcare Team</p>
+							<p>Best regards,<br>The Webphics Team</p>
 
 							<div class="footer">
 								<p>This is an automated message, please do not reply to this email.</p>
-								<p>&copy; 2025 QDS Healthcare Pro. All rights reserved.</p>
+								<p>&copy; 2025 Webphics. All rights reserved.</p>
 							</div>
 						</div>
 					</body>
@@ -169,14 +169,14 @@ export default class EmailTemplateSeeder extends DrizzleService {
 			},
 			{
 				name: "welcome",
-				subject: "Welcome to QDS Healthcare Pro!",
+				subject: "Welcome to Webphics!",
 				html: `
 					<!DOCTYPE html>
 					<html>
 					<head>
 						<meta charset="utf-8">
 						<meta name="viewport" content="width=device-width, initial-scale=1.0">
-						<title>Welcome to QDS Healthcare Pro</title>
+						<title>Welcome to Webphics</title>
 						<style>
 							body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
 							.container { background-color: #f9f9f9; padding: 30px; border-radius: 10px; border: 1px solid #ddd; }
@@ -191,18 +191,18 @@ export default class EmailTemplateSeeder extends DrizzleService {
 					<body>
 						<div class="container">
 							<div class="header">
-								<div class="logo">QDS Healthcare Pro</div>
+								<div class="logo">Webphics</div>
 							</div>
 
 							<div class="welcome-box">
 								<h2>Welcome aboard, {{username}}! 🎉</h2>
-								<p>Your QDS Healthcare Pro account is now active and ready to use.</p>
+								<p>Your Webphics account is now active and ready to use.</p>
 							</div>
 
-							<p>Thank you for joining QDS Healthcare Pro! We're excited to have you as part of our community.</p>
+							<p>Thank you for joining Webphics! We're excited to have you as part of our community.</p>
 
 							<div class="features">
-								<h3>Here's what you can do with QDS Healthcare Pro:</h3>
+								<h3>Here's what you can do with Webphics:</h3>
 								<div class="feature-item">✅ Manage your tasks efficiently</div>
 								<div class="feature-item">📊 Track your productivity</div>
 								<div class="feature-item">👥 Collaborate with your team</div>
@@ -214,11 +214,11 @@ export default class EmailTemplateSeeder extends DrizzleService {
 
 							<p>If you have any questions or need assistance, don't hesitate to reach out to our support team.</p>
 
-							<p>Best regards,<br>The QDS Healthcare Team</p>
+							<p>Best regards,<br>The Webphics Team</p>
 
 							<div class="footer">
 								<p>This is an automated message, please do not reply to this email.</p>
-								<p>&copy; 2025 QDS Healthcare Pro. All rights reserved.</p>
+								<p>&copy; 2025 Webphics. All rights reserved.</p>
 							</div>
 						</div>
 					</body>

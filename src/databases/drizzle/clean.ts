@@ -1,6 +1,8 @@
 import { execSync } from "child_process";
 import "dotenv/config";
+import { existsSync, rmSync } from "fs";
 import mongoose from "mongoose";
+import { join } from "path";
 import pg from "pg";
 
 class DatabaseCleaner {
@@ -55,13 +57,31 @@ class DatabaseCleaner {
 		process.exit(1);
 	}
 
+	private removeDrizzleFolder(): void {
+		const drizzleFolderPath = join(process.cwd(), ".drizzle");
+
+		if (existsSync(drizzleFolderPath)) {
+			try {
+				rmSync(drizzleFolderPath, { recursive: true, force: true });
+				console.log("Removed .drizzle folder successfully");
+			} catch (error) {
+				console.error("Error removing .drizzle folder:", error);
+			}
+		} else {
+			console.log(".drizzle folder does not exist, skipping removal");
+		}
+	}
+
 	async runDbCommands(): Promise<void> {
 		try {
+			// Remove .drizzle folder first
+			this.removeDrizzleFolder();
+
 			await this.pgPool.connect();
 			// await this.clearMongoDatabase();
 			await this.clearPostgresDatabase();
 
-			const commands = ["db:generate", "db:migrate"];
+			const commands = ["db:generate", "db:migrate", "db:seed"];
 			commands.forEach(cmd => execSync(`npm run ${cmd}`, { stdio: "inherit" }));
 
 			console.log("Database reset completed successfully");

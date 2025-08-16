@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { and, eq } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import type { Profile as GoogleUserProfile } from "passport-google-oauth20";
@@ -315,7 +315,7 @@ export default class AuthenticationService extends DrizzleService {
 			const check = await bcrypt.compare(password, hashedPassword);
 
 			if (!check)
-				return ServiceResponse.createRejectResponse(StatusCodes.NOT_FOUND, "Password incorrect");
+				return ServiceResponse.createRejectResponse(StatusCodes.BAD_REQUEST, "Password incorrect");
 
 			return ServiceResponse.createResponse(StatusCodes.OK, "Password checked", check);
 		} catch (error) {

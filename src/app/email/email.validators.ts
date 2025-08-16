@@ -1,12 +1,11 @@
 import type { PgTableWithColumns } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
-import { zodMessages } from "@/core/messages";
 import type { SortingHelper } from "@/utils/sortingHelper";
 import { BaseQuerySchema, baseQuerySchemaShape } from "@/validators/baseQuery.schema";
-import { validateBoolean, validateString } from "@/validators/commonRules";
+import { validateBoolean, validateNumber, validateString } from "@/validators/commonRules";
 
-export const EmailQuerySchema = <T extends PgTableWithColumns<any>>(
+export const emailQuerySchema = <T extends PgTableWithColumns<any>>(
 	sortingHelper: SortingHelper<T>
 ) => {
 	const baseSchema = BaseQuerySchema(sortingHelper);
@@ -21,14 +20,11 @@ export const EmailQuerySchema = <T extends PgTableWithColumns<any>>(
 	);
 };
 
-export const EmailUpdateSchema = z.object({
+export const emailUpdateSchema = z.object({
 	host: validateString("Host"),
-	port: validateString("Port")
-		.min(1, zodMessages.error.required.fieldIsRequired("Port"))
-		.length(3, zodMessages.error.limit.length("Port", 3))
-		.refine(value => {
-			return !isNaN(Number(value));
-		}, zodMessages.error.invalid.invalidNumber("Port")),
+	port: validateNumber("Port", { min: 1 }).max(65535, {
+		message: "Port must be between 1 and 65535"
+	}),
 	secure: validateBoolean("Secure"),
 	username: validateString("Username"),
 	password: validateString("Password"),
@@ -36,5 +32,5 @@ export const EmailUpdateSchema = z.object({
 	fromEmail: validateString("From Email")
 });
 
-export type EmailQuerySchemaType = z.infer<ReturnType<typeof EmailQuerySchema>>;
-export type EmailUpdateSchemaType = z.infer<typeof EmailUpdateSchema>;
+export type EmailQuerySchemaType = z.infer<ReturnType<typeof emailQuerySchema>>;
+export type EmailUpdateSchemaType = z.infer<typeof emailUpdateSchema>;

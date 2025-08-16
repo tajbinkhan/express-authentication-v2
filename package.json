@@ -1,7 +1,7 @@
 {
-	"name": "qds-healthcare-api",
+	"name": "express-auth-v2",
 	"version": "1.0.0",
-	"description": "QDS Healthcare API",
+	"description": "Express Authentication API with advanced features",
 	"main": "dist/server.mjs",
 	"scripts": {
 		"prebuild": "node update‑schema.mjs",
@@ -25,6 +25,7 @@
 		"db:clear": "tsx src/databases/drizzle/clean.ts",
 		"db:seed": "tsx src/seed/superSeeder.ts",
 		"db:seed:users": "tsx src/seed/superSeeder.ts users",
+		"db:seed:emailconfigs": "tsx src/seed/superSeeder.ts emailconfigs",
 		"db:seed:emails": "tsx src/seed/superSeeder.ts emails",
 		"db:seed:clear": "tsx src/seed/superSeeder.ts clear",
 		"db:reset": "npm run db:clear && npm run db:migrate && npm run db:seed",
@@ -49,7 +50,7 @@
 		"node": ">=20.0.0"
 	},
 	"dependencies": {
-		"bcryptjs": "^3.0.2",
+		"bcrypt": "^6.0.0",
 		"cloudinary": "^2.7.0",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",
@@ -79,6 +80,7 @@
 	"devDependencies": {
 		"@eslint/js": "^9.33.0",
 		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
+		"@types/bcrypt": "^6.0.0",
 		"@types/cookie-parser": "^1.4.9",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.3",

@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { and, eq } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 

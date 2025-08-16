@@ -26,6 +26,7 @@ export default class AuthenticationController extends ApiController {
 	protected readonly emailTemplateService: EmailTemplateService;
 	protected readonly emailSMTPService: EmailSMTPService;
 	protected readonly emailService: EmailService;
+	protected readonly smtpConfigName: string = "default_smtp";
 
 	/**
 	 * Construct the controller
@@ -82,7 +83,7 @@ export default class AuthenticationController extends ApiController {
 					emailTemplateService: this.emailTemplateService,
 					emailService: this.emailService,
 					templateName: "email_verification",
-					emailConfigName: "default",
+					emailConfigName: this.smtpConfigName,
 					to: user.data.email,
 					templateData: {
 						username: user.data.username,
@@ -194,18 +195,25 @@ export default class AuthenticationController extends ApiController {
 
 		// Generate OTP for login verification
 		const otp = await this.otpService.saveOTPToDatabase(user.data, TOKEN_LIST.LOGIN_OTP);
-		const template = await this.emailTemplateService.retrieveEmailTemplate("login_otp");
 
-		if (otp && user.data.email && template.data) {
-			// sendEmail({
-			// 	email: user.data.email,
-			// 	template: template.data,
-			// 	data: {
-			// 		username: user.data.username,
-			// 		otp,
-			// 		otpExpirationTime: 5
-			// 	}
-			// });
+		if (otp && user.data.email) {
+			try {
+				sendEmailWithTemplate({
+					emailTemplateService: this.emailTemplateService,
+					emailService: this.emailService,
+					templateName: "login_otp",
+					emailConfigName: this.smtpConfigName,
+					to: user.data.email,
+					templateData: {
+						username: user.data.username,
+						otp,
+						otpExpirationTime: Number(process.env.OTP_RESET_EXPIRY)
+					}
+				});
+			} catch (error) {
+				console.error("Failed to send verification email:", error);
+				// Note: We don't fail the registration if email sending fails
+			}
 		}
 
 		if (process.env.SHOW_OTP) {

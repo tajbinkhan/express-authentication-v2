@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
 import EmailService from "@/app/email/email.service";
-import { EmailQuerySchema, EmailUpdateSchema } from "@/app/email/email.validators";
+import { emailQuerySchema, emailUpdateSchema } from "@/app/email/email.validators";
 
 import { ApiController } from "@/core/controller";
 import { email } from "@/models/drizzle/email.model";
@@ -26,7 +26,7 @@ export default class EmailController extends ApiController {
 	async index(): Promise<Response> {
 		const { query } = this.request;
 
-		const check = EmailQuerySchema(this.sortingHelper).safeParse(query);
+		const check = emailQuerySchema(this.sortingHelper).safeParse(query);
 		if (!check.success) {
 			return this.apiResponse.badResponse(check.error.issues.map(err => err.message).join(" "));
 		}
@@ -52,7 +52,7 @@ export default class EmailController extends ApiController {
 
 		if (isNaN(Number(id))) return this.apiResponse.badResponse("Email ID must be a number");
 
-		const check = EmailUpdateSchema.safeParse(body);
+		const check = emailUpdateSchema.safeParse(body);
 		if (!check.success) {
 			return this.apiResponse.badResponse(check.error.issues.map(err => err.message).join(" "));
 		}
@@ -68,7 +68,7 @@ export default class EmailController extends ApiController {
 	async testSmtpConnection(): Promise<Response> {
 		const { body } = this.request;
 
-		const check = EmailUpdateSchema.safeParse(body);
+		const check = emailUpdateSchema.safeParse(body);
 		if (!check.success) {
 			return this.apiResponse.badResponse(check.error.issues.map(err => err.message).join(" "));
 		}

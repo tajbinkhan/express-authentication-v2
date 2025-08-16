@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 import AuthenticationService from "@/app/authentication/authentication.service";
 import type { CreateUserType } from "@/app/authentication/authentication.type";
