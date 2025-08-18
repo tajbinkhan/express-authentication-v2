@@ -1,5 +1,3 @@
-import bcrypt from "bcrypt";
-
 import AuthenticationService from "@/app/authentication/authentication.service";
 import type { CreateUserType } from "@/app/authentication/authentication.type";
 
@@ -21,7 +19,7 @@ export default class UserSeeder {
 				name: "Tajbin Khan",
 				username: "evan",
 				email: "tajbink@gmail.com",
-				password: await bcrypt.hash("Bang@123", 10),
+				password: "Bang@123",
 				role: "ADMIN",
 				emailVerified: new Date(),
 				image: null
@@ -30,7 +28,7 @@ export default class UserSeeder {
 				name: "Admin User",
 				username: "admin",
 				email: "admin@qdshealthcare.com",
-				password: await bcrypt.hash("Bang@123", 10),
+				password: "Bang@123",
 				role: "ADMIN",
 				emailVerified: new Date(),
 				image: null
