@@ -1,7 +1,7 @@
 import type { Express, NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import pc from "picocolors";
-import { ZodError } from "zod";
+import { z } from "zod";
 
 import { ApiResponse } from "@/utils/serviceApi";
 
@@ -10,7 +10,7 @@ import { ApiResponse } from "@/utils/serviceApi";
  * This middleware catches all errors and prevents the application from crashing
  */
 export function globalErrorHandler(
-	error: Error | ZodError | any,
+	error: Error | z.ZodError | any,
 	req: Request,
 	res: Response,
 	next: NextFunction
@@ -21,7 +21,7 @@ export function globalErrorHandler(
 	logError(error, req);
 
 	// Handle different types of errors
-	if (error instanceof ZodError) {
+	if (error instanceof z.ZodError) {
 		handleZodError(error, apiResponse);
 		return;
 	}
@@ -138,8 +138,8 @@ function logError(error: any, req: Request): void {
 	console.error(pc.red("=".repeat(80)));
 }
 
-function handleZodError(error: ZodError, apiResponse: ApiResponse): void {
-	const errors = error.issues.map(err => ({
+function handleZodError(error: z.ZodError, apiResponse: ApiResponse): void {
+	const errors = error.issues.map((err: z.ZodIssue) => ({
 		field: err.path.join("."),
 		message: err.message
 	}));
