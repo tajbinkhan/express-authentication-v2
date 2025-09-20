@@ -182,9 +182,7 @@ export default class AuthenticationController extends ApiController {
 			return this.apiResponse.badResponse(check.error.issues.map(err => err.message).join(" "));
 		}
 
-		const user = await this.authenticationService.findUserByUsernameOrEmail(
-			check.data.usernameOrEmail
-		);
+		const user = await this.authenticationService.findUserByUsernameOrEmail(check.data.login);
 
 		await this.authenticationService.passwordChecker(check.data.password, user.data.password);
 
@@ -237,9 +235,7 @@ export default class AuthenticationController extends ApiController {
 			return this.apiResponse.badResponse(check.error.issues.map(err => err.message).join(" "));
 		}
 
-		const user = await this.authenticationService.findUserByUsernameOrEmail(
-			check.data.usernameOrEmail
-		);
+		const user = await this.authenticationService.findUserByUsernameOrEmail(check.data.login);
 
 		// Check user verification
 		if (!user.data.emailVerified) {

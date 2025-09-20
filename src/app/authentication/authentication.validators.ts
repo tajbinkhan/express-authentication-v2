@@ -11,12 +11,12 @@ import {
 } from "@/validators/commonRules";
 
 export const userIdentityVerificationSchema = z.object({
-	usernameOrEmail: validateUsernameOrEmail,
+	login: validateUsernameOrEmail,
 	password: validateString("Password")
 });
 
 export const userLoginSchema = z.object({
-	usernameOrEmail: validateUsernameOrEmail,
+	login: validateUsernameOrEmail,
 	password: validateString("Password"),
 	otp: validatePositiveNumber("OTP")
 });

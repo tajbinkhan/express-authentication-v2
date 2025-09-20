@@ -1,10 +1,12 @@
 import type { Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-// Create a type from the status object values
+/** =========================
+ *  Types
+ *  ========================= */
+
 type HttpStatusCode = number;
 
-// Stricter Pagination interface with required fields
 export interface Pagination {
 	totalItems: number;
 	limit: number;
@@ -17,132 +19,161 @@ export interface Pagination {
 	nextPage: number | null;
 }
 
-// Base interface for API responses
+/** What the client receives (server-generated success) */
 interface BaseApiResponse {
 	status: HttpStatusCode;
 	message: string;
+	success: boolean; // derived (not accepted from callers)
 }
 
-// Generic response interfaces with strict typing
-export interface ServiceApiResponse<T> extends BaseApiResponse {
+/** Response shape that your services/controllers can RETURN (success is NOT provided by callers) */
+export interface ServiceApiResponse<T> {
+	status: HttpStatusCode;
+	message: string;
 	data: T;
 	pagination?: Pagination;
 }
 
-export interface ServiceSendApiResponse<T> extends BaseApiResponse {
+/** Params accepted by ApiResponse.sendResponse (no success allowed) */
+export interface ServiceSendApiResponse<T> {
+	status: HttpStatusCode;
+	message: string;
 	data?: T;
 	pagination?: Pagination;
 }
 
-// Error type definitions
+/** Legacy compatibility type detection (not required to pass success) */
 export interface ApiError extends BaseApiResponse {
 	error?: string;
 }
 
-const isApiError = (error: unknown): error is ApiError => {
-	return (
-		error !== null &&
-		typeof error === "object" &&
-		"status" in error &&
-		typeof (error as ApiError).status === "number" &&
-		"message" in error &&
-		typeof (error as ApiError).message === "string"
-	);
-};
+/** =========================
+ *  Internals
+ *  ========================= */
 
 const NO_CONTENT_STATUSES = new Set([StatusCodes.NO_CONTENT]);
+const isSuccessStatus = (status: HttpStatusCode): boolean => status >= 200 && status < 300;
+
+/** Proper error with stack + status */
+export class HttpError extends Error {
+	status: number;
+	expose: boolean;
+
+	constructor(status: number, message: string, opts?: { cause?: unknown; expose?: boolean }) {
+		super(message, { cause: opts?.cause });
+		this.name = "HttpError";
+		this.status = status;
+		this.expose = opts?.expose ?? (status >= 400 && status < 500);
+		Error.captureStackTrace?.(this, HttpError);
+	}
+}
+
+const isApiErrorShape = (error: unknown): error is ApiError =>
+	error !== null &&
+	typeof error === "object" &&
+	"status" in error &&
+	typeof (error as ApiError).status === "number" &&
+	"message" in error &&
+	typeof (error as ApiError).message === "string" &&
+	"success" in error &&
+	typeof (error as ApiError).success === "boolean";
+
+/** =========================
+ *  ServiceResponse
+ *  ========================= */
 
 export class ServiceResponse {
-	static async createResponse<T>(
+	/**
+	 * Build a success/normal payload for controllers/services.
+	 * NOTE: no `success` param; it is derived later based on `status`.
+	 */
+	static createResponse<T>(
 		status: HttpStatusCode,
 		message: string,
 		data: T,
 		pagination?: Pagination
-	): Promise<ServiceApiResponse<T>> {
-		if (NO_CONTENT_STATUSES.has(status)) {
-			return Promise.resolve({ status, message, data: undefined as T });
+	): ServiceApiResponse<T> {
+		return { status, message, data, pagination };
+	}
+
+	/**
+	 * Throw a proper error with stack (no object-throws).
+	 */
+	static createRejectResponse<T>(status: HttpStatusCode, message: string): never {
+		throw new HttpError(status, message);
+	}
+
+	/**
+	 * Normalize unknown errors to HttpError and rethrow.
+	 */
+	static createErrorResponse(error: unknown): never {
+		if (error instanceof Error) {
+			console.error("Error:", {
+				message: error.message,
+				stack: error.stack,
+				cause: (error as any)?.cause
+			});
+		} else {
+			console.error("Error (non-Error):", error);
 		}
-		return Promise.resolve({ status, message, data, pagination });
-	}
 
-	static async createRejectResponse<T>(
-		status: HttpStatusCode,
-		message: string
-	): Promise<ServiceApiResponse<T>> {
-		return Promise.reject({ status, message });
-	}
+		if (error instanceof HttpError) throw error;
 
-	static createErrorResponse(error: unknown): Promise<never> {
-		console.error("Error:", error instanceof Error ? error.message : error);
+		if (isApiErrorShape(error)) {
+			throw new HttpError(error.status, error.message, { expose: error.status < 500 });
+		}
 
-		if (isApiError(error)) return Promise.reject(error);
-
-		return Promise.reject({
-			status: StatusCodes.INTERNAL_SERVER_ERROR,
-			message: "Internal Server Error"
+		throw new HttpError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", {
+			cause: error,
+			expose: false
 		});
 	}
 }
 
-export class ApiResponse {
-	private readonly response: Response;
+/** =========================
+ *  ApiResponse (HTTP sender)
+ *  ========================= */
 
-	constructor(response: Response) {
-		this.response = response;
-	}
+export class ApiResponse {
+	constructor(private readonly res: Response) {}
 
 	successResponse<T>(message: string, data?: T, pagination?: Pagination) {
-		return this.sendResponse<T>({
-			status: StatusCodes.OK,
-			message,
-			data,
-			pagination
-		});
+		return this.sendResponse<T>({ status: StatusCodes.OK, message, data, pagination });
 	}
 
 	unauthorizedResponse(message: string) {
-		return this.sendResponse({
-			status: StatusCodes.UNAUTHORIZED,
-			message
-		});
+		return this.sendResponse({ status: StatusCodes.UNAUTHORIZED, message });
 	}
 
 	forbiddenResponse(message: string) {
-		return this.sendResponse({
-			status: StatusCodes.FORBIDDEN,
-			message
-		});
+		return this.sendResponse({ status: StatusCodes.FORBIDDEN, message });
 	}
 
 	badResponse(message: string) {
-		return this.sendResponse({
-			status: StatusCodes.BAD_REQUEST,
-			message
-		});
+		return this.sendResponse({ status: StatusCodes.BAD_REQUEST, message });
 	}
 
-	internalServerError(message: string = "Internal Server Error") {
-		return this.sendResponse({
-			status: StatusCodes.INTERNAL_SERVER_ERROR,
-			message
-		});
+	internalServerError(message = "Internal Server Error") {
+		return this.sendResponse({ status: StatusCodes.INTERNAL_SERVER_ERROR, message });
 	}
 
+	/**
+	 * Centralized sender. `success` is ALWAYS derived from `status`.
+	 */
 	sendResponse<T>({ status, message, data, pagination }: ServiceSendApiResponse<T>): Response {
 		if (NO_CONTENT_STATUSES.has(status)) {
-			return this.response.status(status).json({});
+			// 204 MUST NOT include any body
+			return this.res.status(status).end();
 		}
 
-		const responseBody: Partial<ServiceSendApiResponse<T>> = { status, message };
+		const wire: BaseApiResponse & { data?: T; pagination?: Pagination } = {
+			status,
+			success: isSuccessStatus(status),
+			message,
+			...(data !== undefined ? { data } : {}),
+			...(pagination ? { pagination } : {})
+		};
 
-		if (data !== undefined) {
-			responseBody.data = data;
-		}
-
-		if (pagination) {
-			responseBody.pagination = pagination;
-		}
-
-		return this.response.status(status).json(responseBody);
+		return this.res.status(status).json(wire);
 	}
 }
