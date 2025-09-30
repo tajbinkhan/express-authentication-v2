@@ -22,9 +22,7 @@ export const googleEnvSchema = z.object({
 });
 
 export const cookieSchema = z.object({
-	COOKIE_SETTINGS: validateEnum("COOKIE_SETTINGS", ["locally", "globally"]),
-	COOKIE_DOMAIN: validateString("COOKIE_DOMAIN"),
-	COOKIE_SAME_SITE: validateEnum("COOKIE_SAME_SITE", ["lax", "strict", "none"])
+	COOKIE_DOMAIN: validateString("COOKIE_DOMAIN")
 });
 
 export const envSchema = z.object({

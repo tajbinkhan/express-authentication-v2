@@ -1,6 +1,6 @@
 import type { CookieOptions } from "express";
 
-import originStore from "@/utils/originStore";
+import { blackListDomains } from "@/core/constants";
 
 interface SameSiteCookieConfig {
 	sameSite: CookieOptions["sameSite"];
@@ -52,126 +52,86 @@ export default class AppHelpers {
 	 */
 	static sameSiteCookieConfig(): SameSiteCookieConfig {
 		try {
-			// Function to determine if it's an IP address
-			const isIpAddress = (hostname: string) => {
+			// Helper function to check if hostname is an IP address
+			const isIpAddress = (hostname: string): boolean => {
 				return /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
 			};
 
-			// For local development, use simplified configuration
-			if (process.env.COOKIE_SETTINGS === "locally") {
+			// Helper function to check if domain is blacklisted
+			const isBlacklistedDomain = (domain: string): boolean => {
+				return blackListDomains.some(blacklistedDomain =>
+					domain.endsWith(blacklistedDomain.replace(".", ""))
+				);
+			};
+
+			// Helper function to get domain from API_URL
+			const getDomainFromApiUrl = (): string => {
+				if (process.env.API_URL) {
+					try {
+						return new URL(process.env.API_URL).hostname;
+					} catch {
+						return process.env.API_URL;
+					}
+				}
+				return "localhost";
+			};
+
+			// Check if COOKIE_DOMAIN exists and determine environment
+			const cookieDomain = process.env.COOKIE_DOMAIN;
+
+			if (!cookieDomain) {
+				// No COOKIE_DOMAIN set - assume local development
+				const fullDomain = getDomainFromApiUrl();
+
 				return {
 					sameSite: "lax",
-					secure: false
+					secure: false,
+					domain: fullDomain
 				};
 			}
 
-			// For global deployment with COOKIE_DOMAIN set
-			if (process.env.COOKIE_SETTINGS === "globally" && process.env.COOKIE_DOMAIN) {
-				const cookieDomain = process.env.COOKIE_DOMAIN;
+			// Remove leading dot to check the actual domain
+			const domainToCheck = cookieDomain.startsWith(".") ? cookieDomain.substring(1) : cookieDomain;
 
-				// Remove leading dot for IP address check
-				const domainToCheck = cookieDomain.startsWith(".")
-					? cookieDomain.substring(1)
-					: cookieDomain;
-
-				// If COOKIE_DOMAIN is an IP address
-				if (isIpAddress(domainToCheck)) {
-					return {
-						sameSite: process.env.COOKIE_SAME_SITE as CookieOptions["sameSite"],
-						secure: true,
-						domain: cookieDomain
-					};
-				}
-
-				// If COOKIE_DOMAIN is a regular domain (like .example.com)
-				return {
-					sameSite: process.env.COOKIE_SAME_SITE as CookieOptions["sameSite"],
-					secure: true,
-					domain: cookieDomain
-				};
-			}
-
-			// Fallback to dynamic detection if COOKIE_SETTINGS is not properly configured
-			const appUrl = originStore.getClientDomain();
-			const apiUrl = originStore.getServerDomain() || process.env.API_URL;
-
-			if (!appUrl) {
-				return {
-					sameSite: "none",
-					secure: true
-				};
-			}
-
-			const appUrlObj = new URL(appUrl);
-			const apiUrlObj = new URL(apiUrl);
-
-			let isSecure = apiUrlObj.protocol === "https:";
-
-			// Function to get domain without port
-			const getDomain = (hostname: string) => {
-				return hostname.split(":")[0];
-			};
-
-			// Better base domain extraction that handles special cases
-			const getBaseDomain = (hostname: string) => {
-				const domain = getDomain(hostname);
-
-				// Handle special cases
-				if (domain === "localhost" || isIpAddress(domain)) {
-					return domain;
-				}
-
-				const parts = domain.split(".");
-				// Need at least 2 parts for a valid domain
-				if (parts.length < 2) return domain;
-
-				// Return last two parts for normal domains
-				return parts.slice(-2).join(".");
-			};
-
-			const appBaseDomain = getBaseDomain(appUrlObj.hostname);
-			const apiBaseDomain = getBaseDomain(apiUrlObj.hostname);
-
-			// Determine domain and sameSite
-			let domain: string | undefined;
-			let sameSite: CookieOptions["sameSite"];
-
-			// Same exact hostname
-			if (getDomain(appUrlObj.hostname) === getDomain(apiUrlObj.hostname)) {
-				domain = getDomain(apiUrlObj.hostname);
-				sameSite = "lax";
-			}
-			// Same base domain (different subdomains)
-			else if (
-				appBaseDomain === apiBaseDomain &&
-				!isIpAddress(appBaseDomain) &&
-				appBaseDomain !== "localhost"
+			// LOCAL DEVELOPMENT - detect by common local domains
+			if (
+				domainToCheck === "localhost" ||
+				domainToCheck === "127.0.0.1" ||
+				isIpAddress(domainToCheck) ||
+				cookieDomain === "localhost"
 			) {
-				domain = "." + appBaseDomain;
-				sameSite = "lax";
-			}
-			// Different domains
-			else {
-				domain = getDomain(apiUrlObj.hostname);
-				sameSite = "none";
-			}
+				const fullDomain = getDomainFromApiUrl();
 
-			// If sameSite is "none", secure must be true
-			if (sameSite === "none") {
-				isSecure = true;
+				return {
+					sameSite: "lax",
+					secure: false,
+					domain: fullDomain
+				};
 			}
 
-			const cookieSetting = {
-				sameSite,
-				secure: isSecure,
-				domain
-			};
+			// PRODUCTION ENVIRONMENT - any other domain
+			// Check if domain is blacklisted
+			if (isBlacklistedDomain(domainToCheck)) {
+				// For blacklisted domains, use strict with full domain name
+				const fullDomain = getDomainFromApiUrl();
+				return {
+					sameSite: "strict",
+					secure: true,
+					domain: fullDomain
+				};
+			}
 
-			return cookieSetting;
-		} catch (error) {
+			// For non-blacklisted domains, use lax with configured domain
 			return {
 				sameSite: "lax",
-				secure: true
+				secure: true,
+				domain: cookieDomain
+			};
+		} catch (error) {
+			// Error fallback - assume local development
+			return {
+				sameSite: "lax",
+				secure: false
 			};
 		}
 	}
